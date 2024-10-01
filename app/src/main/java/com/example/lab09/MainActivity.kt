@@ -117,7 +117,8 @@ fun Contenido(
             composable("postsVer/{id}", arguments = listOf(
                 navArgument("id") { type = NavType.IntType }
             )) {
-                ScreenPost(navController, servicio, it.arguments!!.getInt("id"))
+                ScreenPost(servicio, it.arguments!!.getInt("id"))
+
             }
         }
     }
@@ -130,22 +131,6 @@ fun ScreenInicio() {
     }
 }
 
-@Composable
-fun ScreenPosts(navController: NavHostController, servicio: PostApiService) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Lista de Posts", style = MaterialTheme.typography.headlineMedium)
-        // Usa el servicio para imprimir un mensaje simple (elimina la advertencia)
-        println("Servicio: $servicio")
-    }
-}
-
-@Composable
-fun ScreenPost(navController: NavHostController, servicio: PostApiService, id: Int) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Detalles del Post ID: $id", style = MaterialTheme.typography.headlineMedium)
-        println("Servicio usado en ScreenPost con ID: $id")
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
