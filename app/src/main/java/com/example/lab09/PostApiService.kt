@@ -4,7 +4,6 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface PostApiService {
-
     @GET("posts")
     suspend fun getUserPosts(): List<PostModel>
 

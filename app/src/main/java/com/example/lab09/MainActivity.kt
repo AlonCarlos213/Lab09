@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -42,23 +43,25 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProgPrincipal9() {
-    val urlBase = "https://jsonplaceholder.typicode.com/"
+    val urlBase = "https://dummyjson.com/" // Cambia esta URL base
     val retrofit = Retrofit.Builder()
         .baseUrl(urlBase)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val servicio = retrofit.create(PostApiService::class.java)
+    val postService = retrofit.create(PostApiService::class.java)
+    val productService = retrofit.create(ProductApiService::class.java)
     val navController = rememberNavController()
 
     Scaffold(
         topBar = { BarraSuperior() },
         bottomBar = { BarraInferior(navController) },
         content = { paddingValues ->
-            Contenido(paddingValues, navController, servicio)
+            Contenido(paddingValues, navController, postService, productService)
         }
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,6 +97,12 @@ fun BarraInferior(navController: NavHostController) {
             selected = navController.currentDestination?.route == "posts",
             onClick = { navController.navigate("posts") }
         )
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Products") },
+            label = { Text("Products") },
+            selected = navController.currentDestination?.route == "products",
+            onClick = { navController.navigate("products") }
+        )
     }
 }
 
@@ -101,7 +110,8 @@ fun BarraInferior(navController: NavHostController) {
 fun Contenido(
     pv: PaddingValues,
     navController: NavHostController,
-    servicio: PostApiService
+    postService: PostApiService,
+    productService: ProductApiService
 ) {
     Box(
         modifier = Modifier
@@ -113,12 +123,27 @@ fun Contenido(
             startDestination = "inicio"
         ) {
             composable("inicio") { ScreenInicio() }
-            composable("posts") { ScreenPosts(navController, servicio) }
+            composable("posts") { ScreenPosts(navController, postService) }
             composable("postsVer/{id}", arguments = listOf(
                 navArgument("id") { type = NavType.IntType }
             )) {
-                ScreenPost(servicio, it.arguments!!.getInt("id"))
-
+                val postId = it.arguments?.getInt("id") ?: -1
+                if (postId != -1) {
+                    ScreenPost(postService, postId)
+                } else {
+                    Text("Error al cargar el post. ID inválido.")
+                }
+            }
+            composable("products") { ScreenProducts(navController, productService) }
+            composable("productDetail/{id}", arguments = listOf(
+                navArgument("id") { type = NavType.IntType }
+            )) {
+                val productId = it.arguments?.getInt("id") ?: -1
+                if (productId != -1) {
+                    ScreenProductDetail(productId, productService)
+                } else {
+                    Text("Error al cargar el producto. ID inválido.")
+                }
             }
         }
     }
@@ -131,7 +156,6 @@ fun ScreenInicio() {
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
@@ -139,3 +163,4 @@ fun DefaultPreview() {
         ProgPrincipal9()
     }
 }
+
